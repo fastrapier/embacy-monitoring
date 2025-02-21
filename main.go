@@ -29,10 +29,17 @@ func main() {
 		log.Fatal(err)
 	}
 	freeSlotsArray := doRequest(req, client)
+
+	var isSucces bool
 	for index, isFreeSlot := range freeSlotsArray {
 		if isFreeSlot {
 			color.GreenString("Date: %s is free\n", slotsMap[index]["datetime"])
+			isSucces = true
 		}
+	}
+
+	if isSucces {
+		os.Exit(1)
 	}
 }
 
