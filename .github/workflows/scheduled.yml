@@ -1,7 +1,7 @@
 name: Scheduled work Embacy-monitoring
 on:
   schedule:
-    - '*/5 * * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   get-empty-slots:
