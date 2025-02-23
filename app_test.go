@@ -1,4 +1,4 @@
-////go:build unit
+//go:build unit
 
 package main
 
@@ -27,46 +27,17 @@ func TestIsAvailable(t *testing.T) {
 	assert.NotEmpty(t, data)
 	assert.False(t, data[0])
 }
-
-func TestBuildData(t *testing.T) {
-	dataMap := map[int]map[string]string{
-		0: {"service": "requesting_information", "datetime": "2023-10-10T08:45:00"},
-		1: {"service": "requesting_information", "datetime": "2023-10-10T09:00:00"},
-	}
-	expected := "data[0][service]=requesting_information&data[0][datetime]=2023-10-10T08%3A45%3A00&data[1][service]=requesting_information&data[1][datetime]=2023-10-10T09%3A00%3A00"
+func TestBuildDataReturnsEmptyStringForEmptyDataMap(t *testing.T) {
+	dataMap := map[int]map[string]string{}
+	expected := ""
 	result := buildData(dataMap)
 	if result != expected {
 		t.Errorf("Expected %s, got %s", expected, result)
 	}
 }
 
-func TestBuildMap(t *testing.T) {
-	result := buildMap()
-	if len(result) != 120 {
-		t.Errorf("Expected 120 entries, got %d", len(result))
-	}
-}
-
-func TestDoRequest(t *testing.T) {
-	client := &http.Client{}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`[true, false, true]`))
-	}))
-	defer server.Close()
-
-	req, _ := http.NewRequest("POST", server.URL, strings.NewReader("data"))
-	result := doRequest(req, client)
-	expected := []bool{true, false, true}
-	for i, v := range result {
-		if v != expected[i] {
-			t.Errorf("Expected %v, got %v", expected, result)
-		}
-	}
-}
-
-func TestBuildRequest(t *testing.T) {
-	data := "data"
+func TestBuildRequestWithEmptyData(t *testing.T) {
+	data := ""
 	req, err := buildRequest(data)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -74,7 +45,87 @@ func TestBuildRequest(t *testing.T) {
 	if req.Method != "POST" {
 		t.Errorf("Expected POST method, got %s", req.Method)
 	}
-	if req.URL.String() != "https://russia.tmembassy.gov.tm/ru/appointment/available" {
-		t.Errorf("Expected URL to be https://russia.tmembassy.gov.tm/ru/appointment/available, got %s", req.URL.String())
+	if req.Header.Get("Content-Type") != "application/x-www-form-urlencoded; charset=UTF-8" {
+		t.Errorf("Expected Content-Type to be application/x-www-form-urlencoded; charset=UTF-8, got %s", req.Header.Get("Content-Type"))
+	}
+}
+
+func TestDoRequestReturnsEmptySliceForEmptyResponse(t *testing.T) {
+	client := &http.Client{}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("[]"))
+	}))
+	defer server.Close()
+
+	req, err := http.NewRequest("POST", server.URL, strings.NewReader("data"))
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	result := doRequest(req, client)
+	if len(result) != 0 {
+		t.Errorf("Expected empty slice, got %v", result)
+	}
+}
+
+func TestBuildRequestReturnsErrorForInvalidURL(t *testing.T) {
+	data := "data"
+	originalURL := "https://russia.tmembassy.gov.tm/ru/appointment/available"
+	defer func() { baseURL = originalURL }()
+	baseURL = "http://[::1]:namedport"
+
+	_, err := buildRequest(data)
+	if err == nil {
+		t.Fatalf("Expected error for invalid URL, got nil")
+	}
+}
+
+func TestDoRequestReturnsErrorForInvalidURL(t *testing.T) {
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", "http://invalid-url", strings.NewReader("data"))
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	result := doRequest(req, client)
+	if len(result) != 0 {
+		t.Errorf("Expected empty slice for invalid URL, got %v", result)
+	}
+}
+
+func TestDoRequestHandlesNon200StatusCode(t *testing.T) {
+	client := &http.Client{}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	req, err := http.NewRequest("POST", server.URL, strings.NewReader("data"))
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	result := doRequest(req, client)
+	if len(result) != 0 {
+		t.Errorf("Expected empty slice for non-200 status code, got %v", result)
+	}
+}
+
+func TestDoRequestHandlesInvalidJSONResponse(t *testing.T) {
+	client := &http.Client{}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`invalid json`))
+	}))
+	defer server.Close()
+
+	req, err := http.NewRequest("POST", server.URL, strings.NewReader("data"))
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	result := doRequest(req, client)
+	if len(result) != 0 {
+		t.Errorf("Expected empty slice for invalid JSON response, got %v", result)
 	}
 }

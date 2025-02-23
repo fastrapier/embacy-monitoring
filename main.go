@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"time"
 )
+
+var baseURL = "https://russia.tmembassy.gov.tm/ru/appointment/available"
 
 const ua = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, " +
 	"like Gecko) Chrome/133.0.0.0 Safari/537.36"
@@ -72,47 +73,36 @@ func buildMap() map[int]map[string]string {
 	return data
 }
 
-func doRequest(req *http.Request, client *http.Client) []bool {
-	req.Header.Set("accept", "*/*")
-	req.Header.Set("accept-language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh-TW;q=0.5,zh;q=0.4")
-	req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-	req.Header.Set("origin", "https://russia.tmembassy.gov.tm")
-	req.Header.Set("priority", "u=1, i")
-	req.Header.Set("referer", "https://russia.tmembassy.gov.tm/ru/appointment")
-	req.Header.Set("sec-ch-ua", `"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"`)
-	req.Header.Set("sec-ch-ua-mobile", "?0")
-	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
-	req.Header.Set("sec-fetch-dest", "empty")
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("user-agent", ua)
-	resp, err := client.Do(req)
-	bClose := func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Fatalln(err)
-		}
-	}
-	if err != nil {
-		log.Println(err)
-		bClose(resp.Body)
-		log.Fatal(err)
-	}
-
-	bodyText, err := io.ReadAll(resp.Body)
-	if err != nil {
-		bClose(resp.Body)
-		log.Fatal(err)
-	}
-	bClose(resp.Body)
-	var d []bool
-
-	err = json.Unmarshal(bodyText, &d)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return d
-}
+// go
 func buildRequest(data string) (*http.Request, error) {
-	return http.NewRequest("POST", "https://russia.tmembassy.gov.tm/ru/appointment/available", strings.NewReader(data))
+	req, err := http.NewRequest("POST", baseURL, strings.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	// Устанавливаем Content\-Type всегда
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	return req, nil
+}
+
+func doRequest(req *http.Request, client *http.Client) []bool {
+	resp, err := client.Do(req)
+	if err != nil {
+		return []bool{}
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Printf("error closing response body: %v", err)
+		}
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return []bool{}
+	}
+
+	var result []bool
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return []bool{}
+	}
+	return result
 }
