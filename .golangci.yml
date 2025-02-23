@@ -1,0 +1,90 @@
+run:
+  timeout: 5m
+  tests: true
+  skip-dirs:
+    - vendor
+    - .git
+    - node_modules
+  skip-files:
+    - '*.gen.go'
+    - '*.pb.go'
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - unused
+    - structcheck
+    - varcheck
+    - deadcode
+    - ineffassign
+    - typecheck
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - gocyclo
+    - dupl
+    - goconst
+    - gosec
+    - depguard
+    - gocritic
+    - lll
+    - nakedret
+    - prealloc
+    - scopelint
+    - stylecheck
+    - unparam
+    - whitespace
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - govet
+        - staticcheck
+        - gosimple
+        - unused
+        - structcheck
+        - varcheck
+        - deadcode
+        - ineffassign
+        - typecheck
+        - gofmt
+        - goimports
+        - misspell
+        - unconvert
+        - gocyclo
+        - dupl
+        - goconst
+        - gosec
+        - depguard
+        - gocritic
+        - lll
+        - nakedret
+        - prealloc
+        - scopelint
+        - stylecheck
+        - unparam
+        - whitespace
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  lll:
+    line-length: 120
+  misspell:
+    locale: US
+  dupl:
+    threshold: 100
+  gosec:
+    exclude:
+      - G104
+  depguard:
+    list-type: blacklist
+    packages:
+      - github.com/sirupsen/logrus
+  gocritic:
+    enabled-checks:
+      - ruleguard

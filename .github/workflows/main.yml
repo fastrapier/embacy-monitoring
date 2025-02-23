@@ -2,18 +2,49 @@ name: Scheduled work Embacy-monitoring
 on:
   schedule:
     - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
-  get-empty-slots:
+  lint-golangci:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Golang
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - name: Run golangci-lint
+        run: golangci-lint run
+
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Run tests
+        run: go test ./... -tags=unit
+      - name: Build
+        run: go build -o embacy-monitoring
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: embacy-monitoring-binary
+          path: embacy-monitoring
+
+  get-empty-slots:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download binary
+        uses: actions/download-artifact@v3
+        with:
+          name: embacy-monitoring-binary
 
       - name: Run app
-        run: go run embacy-monitoring
+        run: ./embacy-monitoring
