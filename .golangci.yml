@@ -85,4 +85,5 @@ linters-settings:
       - ruleguard
 
 output:
-  format: checkstyle
+  formats:
+    - colored-line-number
