@@ -74,16 +74,13 @@ linters-settings:
   dupl:
     threshold: 100
   gosec:
-    exclude:
+    excludes:
       - G104
-  depguard:
-    list-type: blacklist
-    packages:
-      - github.com/sirupsen/logrus
+
   gocritic:
     enabled-checks:
       - ruleguard
 
 output:
   formats:
-    - name: colored-line-number
+    - format: colored-line-number
