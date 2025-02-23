@@ -63,6 +63,7 @@ linters:
     - stylecheck
     - unparam
     - whitespace
+    - gci
 
 linters-settings:
   gocyclo:
