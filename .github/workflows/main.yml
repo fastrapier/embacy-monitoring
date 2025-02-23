@@ -15,6 +15,7 @@ jobs:
   lint-golangci:
     runs-on: ubuntu-22.04
     if: github.event_name == 'push'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,7 +44,7 @@ jobs:
       - name: Run tests
         run: go test ./... -tags=unit
       - name: Build
-        run: go build -o embacy-monitoring
+        run: go build -o embassy-monitoring
       - name: List files
         run: ls -la
       - name: Upload binary
