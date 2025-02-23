@@ -48,7 +48,7 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          if-no-files-found: 'err'
+          if-no-files-found: 'error'
           name: embassy-monitoring
           path: .
 
