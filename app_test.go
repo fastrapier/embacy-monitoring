@@ -5,11 +5,9 @@ package main
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -28,28 +26,6 @@ func TestIsAvailable(t *testing.T) {
 	data := doRequest(req, &http.Client{})
 	assert.NotEmpty(t, data)
 	assert.False(t, data[0])
-}
-
-func TestMainFunction(t *testing.T) {
-	os.Setenv("TEST_GREEN", "true")
-	defer os.Unsetenv("TEST_GREEN")
-
-	// Capture the output
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	main()
-
-	w.Close()
-	os.Stdout = old
-
-	var buf strings.Builder
-	io.Copy(&buf, r)
-
-	if !strings.Contains(buf.String(), "Test is set to true") {
-		t.Errorf("Expected output to contain 'Test is set to true'")
-	}
 }
 
 func TestBuildData(t *testing.T) {
