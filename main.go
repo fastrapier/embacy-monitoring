@@ -85,28 +85,29 @@ func doRequest(req *http.Request, client *http.Client) []bool {
 	req.Header.Set("sec-fetch-site", "same-origin")
 	req.Header.Set("user-agent", ua)
 	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	defer func(Body io.ReadCloser) {
+	bClose := func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			log.Fatalln(err)
 		}
-	}(resp.Body)
-	bodyText, err := io.ReadAll(resp.Body)
+	}
 	if err != nil {
 		log.Println(err)
+		bClose(resp.Body)
+		log.Fatal(err)
 	}
+
+	bodyText, err := io.ReadAll(resp.Body)
+	if err != nil {
+		bClose(resp.Body)
+		log.Fatal(err)
+	}
+	bClose(resp.Body)
 	var d []bool
 
 	err = json.Unmarshal(bodyText, &d)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	return d
