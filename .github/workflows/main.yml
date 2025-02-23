@@ -53,5 +53,8 @@ jobs:
         with:
           name: embacy-monitoring-binary
 
+      - name: Make binary executable
+        run: chmod +x embacy-monitoring
+
       - name: Run app
         run: ./embacy-monitoring
