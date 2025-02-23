@@ -51,7 +51,7 @@ jobs:
         with:
           if-no-files-found: 'error'
           name: embassy-monitoring
-          path: ''
+          path: .
 
 
   release:
