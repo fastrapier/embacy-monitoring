@@ -1,44 +1,16 @@
 run:
   timeout: 5m
   tests: true
-  skip-dirs:
+
+issues:
+  exclude-use-default: false
+  exclude-files:
+    - '\.gen\.go'
+    - '\.pb\.go'
+  exclude-dirs:
     - vendor
     - .git
     - node_modules
-  skip-files:
-    - '*.gen.go'
-    - '*.pb.go'
-linters:
-  enable:
-    - govet
-    - errcheck
-    - staticcheck
-    - gosimple
-    - unused
-    - structcheck
-    - varcheck
-    - deadcode
-    - ineffassign
-    - typecheck
-    - gofmt
-    - goimports
-    - misspell
-    - unconvert
-    - gocyclo
-    - dupl
-    - goconst
-    - gosec
-    - depguard
-    - gocritic
-    - lll
-    - nakedret
-    - prealloc
-    - scopelint
-    - stylecheck
-    - unparam
-    - whitespace
-issues:
-  exclude-use-default: false
   exclude-rules:
     - path: _test\.go
       linters:
@@ -47,9 +19,6 @@ issues:
         - staticcheck
         - gosimple
         - unused
-        - structcheck
-        - varcheck
-        - deadcode
         - ineffassign
         - typecheck
         - gofmt
@@ -65,10 +34,36 @@ issues:
         - lll
         - nakedret
         - prealloc
-        - scopelint
         - stylecheck
         - unparam
         - whitespace
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - unused
+    - ineffassign
+    - typecheck
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - gocyclo
+    - dupl
+    - goconst
+    - gosec
+    - depguard
+    - gocritic
+    - lll
+    - nakedret
+    - prealloc
+    - stylecheck
+    - unparam
+    - whitespace
+
 linters-settings:
   gocyclo:
     min-complexity: 15
