@@ -1,4 +1,4 @@
-//go:build unit
+////go:build unit
 
 package main
 
@@ -27,6 +27,7 @@ func TestIsAvailable(t *testing.T) {
 	assert.NoError(t, err)
 	data := doRequest(req, &http.Client{})
 	assert.NotEmpty(t, data)
+	assert.False(t, data[0])
 }
 
 func TestMainFunction(t *testing.T) {
