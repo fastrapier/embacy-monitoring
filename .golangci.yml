@@ -86,4 +86,4 @@ linters-settings:
 
 output:
   formats:
-    - colored-line-number
+    - name: colored-line-number
