@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fatih/color"
 	"io"
 	"log"
 	"net/http"
@@ -14,12 +13,6 @@ import (
 )
 
 func main() {
-	isTest := os.Getenv("TEST_GREEN")
-	if isTest == "true" {
-		color.Blue("Test is set to true")
-		color.Green("Date: %s is free\n", time.Now().Format(time.DateTime))
-	}
-
 	client := &http.Client{}
 
 	slotsMap := buildMap()
@@ -30,15 +23,15 @@ func main() {
 	}
 	freeSlotsArray := doRequest(req, client)
 
-	var isSucces bool
+	var isSuccess bool
 	for index, isFreeSlot := range freeSlotsArray {
 		if isFreeSlot {
-			color.GreenString("Date: %s is free\n", slotsMap[index]["datetime"])
-			isSucces = true
+			fmt.Printf("Date: %s is free\n", slotsMap[index]["datetime"])
+			isSuccess = true
 		}
 	}
 
-	if isSucces {
+	if isSuccess {
 		os.Exit(1)
 	}
 }
@@ -61,11 +54,9 @@ func buildMap() map[int]map[string]string {
 
 	now := time.Now()
 	for i := 0; i < 15; i++ {
-
 		dateStart := time.Date(now.Year(), now.Month(), now.Day(), 8, 45, 0, 0, time.Local)
 		dateStart = dateStart.AddDate(0, 0, i)
 		for j := 0; j < 8; j++ {
-
 			dateStart = dateStart.Add(time.Duration(15) * time.Minute)
 
 			data[index] = map[string]string{
@@ -74,7 +65,6 @@ func buildMap() map[int]map[string]string {
 			}
 			index++
 		}
-
 	}
 	return data
 }
@@ -93,15 +83,20 @@ func doRequest(req *http.Request, client *http.Client) []bool {
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-site", "same-origin")
 	req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
-	//req.Header.Set("x-csrf-token", "9fZONzituWlJGq0d0Uf0gPJhvxcr4r3F67kFVsDZ")
-	//req.Header.Set("x-requested-with", "XMLHttpRequest")
-	//req.Header.Set("cookie", "_ga=GA1.1.1912985171.1740134268; _ga_4TCM7NT7HE=GS1.1.1740134267.1.1.1740134373.0.0.0; _ga_09D0VDW7XV=GS1.1.1740134268.1.1.1740134373.0.0.0")
+	// req.Header.Set("x-csrf-token", "9fZONzituWlJGq0d0Uf0gPJhvxcr4r3F67kFVsDZ")
+	// req.Header.Set("x-requested-with", "XMLHttpRequest")
+	// req.Header.Set("cookie", "_ga=GA1.1.1912985171.1740134268; _ga_4TCM7NT7HE=GS1.1.1740134267.1.1.1740134373.0.0.0; _ga_09D0VDW7XV=GS1.1.1740134268.1.1.1740134373.0.0.0")
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resp.Body)
 	bodyText, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
