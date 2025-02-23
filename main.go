@@ -70,13 +70,11 @@ func buildMap() map[int]map[string]string {
 	return data
 }
 
-// go
 func buildRequest(data string) (*http.Request, error) {
 	req, err := http.NewRequest("POST", baseURL, strings.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
-	// Устанавливаем Content\-Type всегда
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	return req, nil
 }
