@@ -83,3 +83,6 @@ linters-settings:
   gocritic:
     enabled-checks:
       - ruleguard
+
+output:
+  format: checkstyle
