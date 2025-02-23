@@ -61,10 +61,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: embassy-monitoring
+      - name: List files
+        run: ls -la
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          files: embassy-monitoring
+          files: embacy-monitoring
+          make_latest: true
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
