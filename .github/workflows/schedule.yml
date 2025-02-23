@@ -8,17 +8,10 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.event_name == 'schedule'
     steps:
-      - name: Install GitHub CLI
-        run: |
-          sudo apt update && sudo apt install -y gh
-
-      - name: Download latest release asset
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release download latest --pattern embassy-monitoring
-      - name: Make binary executable
-        run: chmod +x embacy-monitoring
-
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
       - name: Run app
-        run: ./embacy-monitoring
+        run: go run embassy-monitoring
