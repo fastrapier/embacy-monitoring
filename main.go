@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const ua = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+
 func main() {
 	client := &http.Client{}
 
@@ -80,32 +82,31 @@ func doRequest(req *http.Request, client *http.Client) []bool {
 	req.Header.Set("sec-ch-ua-mobile", "?0")
 	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
 	req.Header.Set("sec-fetch-dest", "empty")
-	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
-	// req.Header.Set("x-csrf-token", "9fZONzituWlJGq0d0Uf0gPJhvxcr4r3F67kFVsDZ")
-	// req.Header.Set("x-requested-with", "XMLHttpRequest")
-	// req.Header.Set("cookie", "_ga=GA1.1.1912985171.1740134268; _ga_4TCM7NT7HE=GS1.1.1740134267.1.1.1740134373.0.0.0; _ga_09D0VDW7XV=GS1.1.1740134268.1.1.1740134373.0.0.0")
+	req.Header.Set("user-agent", ua)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		os.Exit(1)
 	}
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			os.Exit(1)
 		}
 	}(resp.Body)
 	bodyText, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var d []bool
 
 	err = json.Unmarshal(bodyText, &d)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		os.Exit(1)
 	}
 
 	return d
