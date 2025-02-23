@@ -43,11 +43,14 @@ jobs:
         run: go test ./... -tags=unit
       - name: Build
         run: go build -o embacy-monitoring
+      - name: List files
+        run: ls -la
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
+          if-no-files-found: 'err'
           name: embassy-monitoring
-          path: embassy-monitoring
+          path: .
 
   release:
     runs-on: ubuntu-22.04
